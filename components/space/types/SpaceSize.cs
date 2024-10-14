@@ -4,9 +4,10 @@
 
 namespace AntDesign
 {
-    public static class DescriptionsLayout
+    public sealed class SpaceSize
     {
-        public const string Horizontal = "horizontal";
-        public const string Vertical = "vertical";
+        public static readonly string Small = "small";
+        public static readonly string Middle = "middle";
+        public static readonly string Large = "large";
     }
 }

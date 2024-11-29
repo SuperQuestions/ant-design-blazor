@@ -484,7 +484,7 @@ namespace AntDesign.Internal.Form.Validate
         {
             result = null;
 
-            if (validationAttribute is CompareAttribute compareAttribute)
+            if (validationAttribute is CompareAttribute)
             {
                 result = validationAttribute.GetValidationResult(validationContext.Value, new ValidationContext(validationContext.Model));
                 if (result == null)
@@ -502,7 +502,7 @@ namespace AntDesign.Internal.Form.Validate
                 validationAttribute.ErrorMessage = validationContext.Rule.Message;
             }
 
-            string errorMessage = validationAttribute.FormatErrorMessage(validationContext.DisplayName);
+            var errorMessage = validationAttribute.FormatErrorMessage(validationContext.DisplayName);
 
             result = new ValidationResult(errorMessage, new string[] { validationContext.FieldName });
 

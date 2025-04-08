@@ -78,43 +78,43 @@ namespace AntDesign
         [Parameter]
         public RenderFragment ChildContent { get; set; }
 
-        internal IList<IDescriptionsItem> Items { get; } = [];
+        internal IList<IDescriptionsItem> Items { get; } = new List<IDescriptionsItem>();
 
-        private List<List<(IDescriptionsItem item, int realSpan)>> _itemMatrix = [];
+        private List<List<(IDescriptionsItem item, int realSpan)>> _itemMatrix = new List<List<(IDescriptionsItem item, int realSpan)>>();
 
         [Inject]
         private IDomEventListener DomEventListener { get; set; }
 
         private int _realColumn;
 
-        private static readonly Dictionary<string, int> _defaultColumnMap = new()
+        private static Dictionary<string, int> _defaultColumnMap = new Dictionary<string, int>
         {
             { "Xxl", 3 },
-            { "Xl", 3 },
-            { "Lg", 3 },
-            { "Md", 3 },
-            { "Sm", 2 },
-            { "Xs", 1 }
+            { "Xl", 3},
+            { "Lg", 3},
+            { "Md", 3},
+            { "Sm", 2},
+            { "Xs", 1}
         };
 
-        private static readonly List<(int PixelWidth, BreakpointType Breakpoint)> _descriptionsResponsiveMap =
-        [
+        private static readonly List<(int PixelWidth, BreakpointType Breakpoint)> _descriptionsResponsiveMap = new List<(int, BreakpointType)>()
+        {
             (575,BreakpointType.Xs),
             (576,BreakpointType.Sm),
             (768,BreakpointType.Md),
             (992,BreakpointType.Lg),
             (1200,BreakpointType.Xl),
             (1600,BreakpointType.Xxl)
-        ];
+        };
 
         private void SetClassMap()
         {
             ClassMapper
                 .Add("ant-descriptions")
                 .If("ant-descriptions", () => RTL)
-                .If("ant-descriptions-bordered", () => Bordered)
-                .If("ant-descriptions-middle", () => Size == DescriptionsSize.Middle)
-                .If("ant-descriptions-small", () => Size == DescriptionsSize.Small);
+                .If("ant-descriptions-bordered", () => this.Bordered)
+                .If("ant-descriptions-middle", () => this.Size == DescriptionsSize.Middle)
+                .If("ant-descriptions-small", () => this.Size == DescriptionsSize.Small);
         }
 
         protected override async Task OnInitializedAsync()
@@ -163,15 +163,14 @@ namespace AntDesign
 
         private void PrepareMatrix()
         {
-            List<List<(IDescriptionsItem item, int realSpan)>> itemMatrix = [];
+            List<List<(IDescriptionsItem item, int realSpan)>> itemMatrix = new List<List<(IDescriptionsItem item, int realSpan)>>();
 
-            List<(IDescriptionsItem item, int realSpan)> currentRow = [];
+            List<(IDescriptionsItem item, int realSpan)> currentRow = new List<(IDescriptionsItem item, int realSpan)>();
             var width = 0;
 
-            var items = Items;
-            for (var i = 0; i < items.Count; i++)
+            for (int i = 0; i < this.Items.Count; i++)
             {
-                var item = items[i];
+                var item = this.Items[i];
                 width += item.Span;
 
                 if (width >= _realColumn)
@@ -179,7 +178,7 @@ namespace AntDesign
                     currentRow.Add((item, _realColumn - (width - item.Span)));
                     FlushRow();
                 }
-                else if (i == items.Count - 1)
+                else if (i == this.Items.Count - 1)
                 {
                     currentRow.Add((item, _realColumn - (width - item.Span)));
                     FlushRow();
@@ -194,7 +193,7 @@ namespace AntDesign
             void FlushRow()
             {
                 itemMatrix.Add(currentRow);
-                currentRow = [];
+                currentRow = new List<(IDescriptionsItem item, int realSpan)>();
                 width = 0;
             }
         }
@@ -207,11 +206,10 @@ namespace AntDesign
             }
             else
             {
-                var element = await JsInvokeAsync<HtmlElement>(JSInteropConstants.GetDomInfo, Ref);
+                HtmlElement element = await JsInvokeAsync<HtmlElement>(JSInteropConstants.GetDomInfo, Ref);
                 var breakpointTuple = _descriptionsResponsiveMap.FirstOrDefault(x => x.PixelWidth > element.ClientWidth);
                 var bp = breakpointTuple == default ? BreakpointType.Xxl : breakpointTuple.Breakpoint;
-                var bpKey = bp.ToString();
-                _realColumn = Column.AsT1.TryGetValue(bpKey, out var col) ? col : _defaultColumnMap[bpKey];
+                _realColumn = Column.AsT1.ContainsKey(bp.ToString()) ? Column.AsT1[bp.ToString()] : _defaultColumnMap[bp.ToString()];
             }
         }
     }

@@ -229,9 +229,20 @@ namespace AntDesign
         [Parameter]
         public OneOf<HttpMethod, string> Method { get; set; } = HttpMethod.Post;
 
-        private bool IsText => ListType == UploadListType.Text;
+        /// <summary>
+        /// Whether to upload multiple files in a single request (only for multiple file upload)
+        /// </summary>
+        [Parameter]
+        public bool BatchUpload { get; set; }
 
-        // private bool IsPicture => ListType == UploadListType.Picture;
+        /// <summary>
+        /// Whether to send cookies when making upload requests
+        /// </summary>
+        /// <default value="false"/>
+        [Parameter]
+        public bool WithCredentials { get; set; }
+
+        private bool IsText => ListType == UploadListType.Text;
 
         private bool IsPictureCard => ListType == UploadListType.PictureCard;
 
